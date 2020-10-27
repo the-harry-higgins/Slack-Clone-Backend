@@ -1,13 +1,30 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   const ThreadMessage = sequelize.define('ThreadMessage', {
-    userId: DataTypes.INTEGER,
-    channelId: DataTypes.INTEGER,
-    messageId: DataTypes.INTEGER,
-    content: DataTypes.TEXT
+    userId: {
+      allowNull: false,
+      type: DataTypes.INTEGER,
+      references: { model: 'Users' }
+    },
+    channelId: {
+      allowNull: false,
+      type: DataTypes.INTEGER,
+      references: { model: 'Channels' }
+    },
+    messageId: {
+      allowNull: false,
+      type: DataTypes.INTEGER,
+      references: { model: 'Messages' }
+    },
+    content: {
+      allowNull: false,
+      type: DataTypes.TEXT,
+    },
   }, {});
   ThreadMessage.associate = function(models) {
-    // associations can be defined here
+    ThreadMessage.belongsTo(models.User, { foreignKey: 'userId' });
+    ThreadMessage.belongsTo(models.Channel, { foreignKey: 'channelId' });
+    ThreadMessage.belongsTo(models.Message, { foreignKey: 'messageId' });
   };
   return ThreadMessage;
 };

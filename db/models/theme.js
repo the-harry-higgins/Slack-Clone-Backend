@@ -1,13 +1,25 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   const Theme = sequelize.define('Theme', {
-    primaryColor: DataTypes.STRING,
-    secondaryColor: DataTypes.STRING,
-    textColor: DataTypes.STRING,
-    highlightColor: DataTypes.STRING
+    primaryColor: {
+      allowNull: false,
+      type: DataTypes.STRING,
+    },
+    secondaryColor: {
+      allowNull: false,
+      type: DataTypes.STRING,
+    },
+    textColor: {
+      allowNull: false,
+      type: DataTypes.STRING,
+    },
+    highlightColor: {
+      allowNull: false,
+      type: DataTypes.STRING,
+    },
   }, {});
   Theme.associate = function(models) {
-    // associations can be defined here
+    Theme.hasMany(models.User, { foreignKey: 'themeId' });
   };
   return Theme;
 };

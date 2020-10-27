@@ -1,10 +1,13 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   const ChannelType = sequelize.define('ChannelType', {
-    type: DataTypes.STRING
+    type: {
+      allowNull: false,
+      type: DataTypes.STRING,
+    }
   }, {});
   ChannelType.associate = function(models) {
-    // associations can be defined here
+    ChannelType.hasMany(models.Channel, { foreignKey: 'channelTypeId' });
   };
   return ChannelType;
 };
