@@ -1,7 +1,7 @@
 'use strict';
 const faker = require('faker');
 const bcrypt = require('bcryptjs');
-const {randomNumberInRange} = require('./seeder-utils');
+const {randomNumberInRange} = require('../seeder-utils');
 
 function createPassword(password) {
   return bcrypt.hashSync(password);

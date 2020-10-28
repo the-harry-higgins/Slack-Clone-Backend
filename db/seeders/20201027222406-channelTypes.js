@@ -1,6 +1,6 @@
 'use strict';
 
-const { r } = require('./seeder-utils');
+const { r } = require('../seeder-utils');
 
 module.exports = {
   up: (queryInterface, Sequelize) => {

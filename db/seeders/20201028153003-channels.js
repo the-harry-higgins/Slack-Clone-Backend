@@ -1,6 +1,6 @@
 'use strict';
 const faker = require('faker');
-const { r } = require('./seeder-utils');
+const { r } = require('../seeder-utils');
 
 const PUBLIC = 1;
 const PRIVATE = 2;
