@@ -1,13 +1,10 @@
 'use strict';
 const faker = require('faker');
 const bcrypt = require('bcryptjs');
+const {randomNumberInRange} = require('./seeder-utils');
 
 function createPassword(password) {
   return bcrypt.hashSync(password);
-}
-
-function randomNumberInRange(min, max) {
-  return Math.round(Math.random() * (max - min)) + min;
 }
 
 function createUser() {
@@ -31,7 +28,6 @@ module.exports = {
     users.push({ email: 'demouser@demo.com', fullName: 'Demo User', displayName: 'Demo User', phoneNumber: '555-555-5555', profileImage: '', themeId: 1, lightMode: true, hashedPassword: createPassword('password'), createdAt: new Date(), updatedAt: new Date() });
     for (let i = 0; i < 100; i++) {
       const user = createUser();
-      console.log(user);
       users.push(user);
     }
     return queryInterface.bulkInsert('Users', users, {});

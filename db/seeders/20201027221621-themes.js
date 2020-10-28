@@ -1,10 +1,6 @@
 'use strict';
 
-function r(o) {
-  o.createdAt = new Date();
-  o.updatedAt = new Date();
-  return o;
-}
+const {r} = require('./seeder-utils');
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
