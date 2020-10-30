@@ -9,10 +9,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       unique: true
     },
-    fullName: {
-      allowNull: false,
-      type: DataTypes.STRING,
-    },
     displayName: {
       allowNull: false,
       type: DataTypes.STRING,
@@ -37,9 +33,6 @@ module.exports = (sequelize, DataTypes) => {
     hashedPassword: {
       allowNull: false,
       type: DataTypes.STRING.BINARY,
-    },
-    tokenId: {
-      type: DataTypes.STRING
     }
   }, {});
 
@@ -55,8 +48,6 @@ module.exports = (sequelize, DataTypes) => {
     });
   };
 
-  User.prototype.isValid = () => true;
-
   User.prototype.setPassword = function (password) {
     this.hashedPassword = bcrypt.hashSync(password);
     return this;
@@ -70,7 +61,6 @@ module.exports = (sequelize, DataTypes) => {
     return {
       id: this.id,
       email: this.email,
-      fullName: this.fullName,
       displayName: this.displayName,
       phoneNumber: this.phoneNumber,
       profileImage: this.profileImage,

@@ -13,10 +13,6 @@ module.exports = {
         unique: true,
         type: Sequelize.STRING
       },
-      fullName: {
-        allowNull: false,
-        type: Sequelize.STRING
-      },
       displayName: {
         allowNull: false,
         type: Sequelize.STRING
@@ -44,9 +40,6 @@ module.exports = {
       hashedPassword: {
         allowNull: false,
         type: Sequelize.STRING.BINARY
-      },
-      tokenId: {
-        type: Sequelize.STRING(36),
       },
       createdAt: {
         allowNull: false,

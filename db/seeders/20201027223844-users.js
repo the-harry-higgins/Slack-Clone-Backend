@@ -10,7 +10,6 @@ function createPassword(password) {
 function createUser() {
   return {
     email: faker.internet.email(),
-    fullName: faker.name.findName(),
     displayName: faker.name.findName(),
     phoneNumber: faker.phone.phoneNumber(),
     profileImage: faker.image.avatar(),
@@ -25,7 +24,17 @@ function createUser() {
 module.exports = {
   up: (queryInterface, Sequelize) => {
     const users = [];
-    users.push({ email: 'demouser@demo.com', fullName: 'Demo User', displayName: 'Demo User', phoneNumber: '555-555-5555', profileImage: '', themeId: 1, lightMode: true, hashedPassword: createPassword('password'), createdAt: new Date(), updatedAt: new Date() });
+    users.push({ 
+      email: 'demouser@demo.com', 
+      displayName: 'Demo User', 
+      phoneNumber: '555-555-5555', 
+      profileImage: faker.image.avatar(), 
+      themeId: 1, 
+      lightMode: true, 
+      hashedPassword: createPassword('password'), 
+      createdAt: new Date(), 
+      updatedAt: new Date() 
+    });
     for (let i = 0; i < 100; i++) {
       const user = createUser();
       users.push(user);

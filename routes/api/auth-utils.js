@@ -1,22 +1,22 @@
 const bearerToken = require('express-bearer-token');
 const jwt = require('jsonwebtoken');
-const uuid = require('uuid').v4;
 
 const { jwtConfig: { secret, expiresIn } } = require('../../config');
 
-function generateToken(user) {
-  const data = {
-    displayName: user.displayName,
-  };
-  const jwtid = uuid();
+const { User } = require('../../db/models');
 
-  return {
-    jti: jwtid,
-    token: jwt.sign({ data }, secret, { expiresIn: Number.parseInt(expiresIn), jwtid })
-  };
+
+const generateToken = user => {
+  return jwt.sign(
+      { id: user.id },
+      secret,
+      // { expiresIn: Number.parseInt(expiresIn) }
+      { expiresIn: 60 }
+    );
 }
 
 function restoreUser(req, res, next) {
+  console.log('RESTORING USER');
   const { token } = req;
 
   if (!token) {
@@ -28,16 +28,18 @@ function restoreUser(req, res, next) {
       err.status = 403;
       return next(err);
     }
-
-    const tokenId = payload.jti;
+    console.log(payload);
+    const { id } = payload;
+    console.log(id);
 
     try {
-      req.user = await User.findOne({ where: { tokenId } });
+      req.user = await User.findByPk(parseInt(id));
     } catch (e) {
+      console.log(e);
       return next(e);
     }
 
-    if (!req.user.isValid()) {
+    if (!req.user) {
       return next({ status: 404, message: 'session not found' });
     }
 
