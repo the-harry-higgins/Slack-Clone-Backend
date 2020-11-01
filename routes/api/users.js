@@ -23,12 +23,12 @@ const password =
     .withMessage('Please provide a password');
 
 // GET all users
-router.get('/', asyncHandler(async(req, res, next) => {
-  const users = await User.findAll({
-    attributes: ['id', 'email', 'fullName', 'displayName', 'phoneNumber', 'profileImage', 'themeId', 'lightMode', 'createdAt', 'updatedAt']
-  });
-  res.json(users);
-}));
+// router.get('/', asyncHandler(async(req, res, next) => {
+//   const users = await User.findAll({
+//     attributes: ['id', 'email', 'fullName', 'displayName', 'phoneNumber', 'profileImage', 'themeId', 'lightMode', 'createdAt', 'updatedAt']
+//   });
+//   res.json(users);
+// }));
 
 // CREATE a new user
 router.post('/', [displayName, email, password], asyncHandler(async(req, res, next) => {
@@ -54,11 +54,11 @@ router.post('/', [displayName, email, password], asyncHandler(async(req, res, ne
   res.json({ token, user: user.toSafeObject() });
 }))
 
-router.get('/:id', asyncHandler(async (req, res, next) => {
-  const user = await User.findByPk(req.params.id, {
-    attributes: ['id', 'email', 'fullName', 'displayName', 'phoneNumber', 'profileImage', 'themeId', 'lightMode', 'createdAt', 'updatedAt']
-  });
-  res.json(user);
-}));
+// router.get('/:id', asyncHandler(async (req, res, next) => {
+//   const user = await User.findByPk(req.params.id, {
+//     attributes: ['id', 'email', 'fullName', 'displayName', 'phoneNumber', 'profileImage', 'themeId', 'lightMode', 'createdAt', 'updatedAt']
+//   });
+//   res.json(user);
+// }));
 
 module.exports = router;

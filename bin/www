@@ -7,6 +7,7 @@ const {port} = require('../config');
 db.sequelize.authenticate()
   .then(() => {
     console.log('Connected to database successfully.');
+    
     app.listen(port, () => console.log(`Server is listening on port ${port}`));
   })
   .catch(err => {

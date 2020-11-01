@@ -2,21 +2,18 @@ const bearerToken = require('express-bearer-token');
 const jwt = require('jsonwebtoken');
 
 const { jwtConfig: { secret, expiresIn } } = require('../../config');
-
-const { User } = require('../../db/models');
+const { getUserThemeAndChannels } = require('../utils');
 
 
 const generateToken = user => {
   return jwt.sign(
-      { id: user.id },
-      secret,
-      // { expiresIn: Number.parseInt(expiresIn) }
-      { expiresIn: 60 }
-    );
+    { id: user.id },
+    secret,
+    { expiresIn: Number.parseInt(expiresIn) }
+  );
 }
 
 function restoreUser(req, res, next) {
-  console.log('RESTORING USER');
   const { token } = req;
 
   if (!token) {
@@ -28,14 +25,11 @@ function restoreUser(req, res, next) {
       err.status = 403;
       return next(err);
     }
-    console.log(payload);
     const { id } = payload;
-    console.log(id);
 
     try {
-      req.user = await User.findByPk(parseInt(id));
+      req.user = await getUserThemeAndChannels(req, parseInt(id));
     } catch (e) {
-      console.log(e);
       return next(e);
     }
 

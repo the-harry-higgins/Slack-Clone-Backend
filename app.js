@@ -9,15 +9,15 @@ const path = require('path');
 const routes = require('./routes');
 
 const app = express();
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
 
 const whitelist = ['http://localhost:3000']
 const corsOptions = {
   origin: (origin, callback) => {
     if (whitelist.includes(origin) || !origin) {
-      console.log('Accepted');
       callback(null, true);
     } else {
-      console.log('Rejected');
       callback(new Error('Not allowed by CORS'));
     }
   }
@@ -48,4 +48,21 @@ app.use(function (err, _req, res, _next) {
   });
 });
 
-module.exports = app;
+io.on('connection', socket => {
+  console.log('a user connected');
+  socket.on('join rooms', channels => {
+    channels.forEach(channel => {
+      socket.join(channel, () => {
+        console.log(`${socket.id} has joined ${channel}`);
+      });
+      socket.on(channel, async({ user, message}) => {
+        console.log(`${channel} -- ${message} -- ${user.displayName}`);
+        // const newMessage = await addMessageToChannel(nickName, channel.id, message);
+        socket.to(channel).emit(channel, { user, message });
+        socket.emit(channel, { user, message });
+      })
+    });
+  });
+});
+
+module.exports = http;
