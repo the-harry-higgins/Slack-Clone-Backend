@@ -7,23 +7,25 @@ const logger = require('morgan');
 const path = require('path');
 
 const routes = require('./routes');
+const { Message } = require('./db/models');
+
 
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 
-const whitelist = ['http://localhost:3000']
-const corsOptions = {
-  origin: (origin, callback) => {
-    if (whitelist.includes(origin) || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  }
-}
+// const whitelist = ['http://localhost:3000']
+// const corsOptions = {
+//   origin: (origin, callback) => {
+//     if (whitelist.includes(origin) || !origin) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error('Not allowed by CORS'));
+//     }
+//   }
+// }
 
-app.use(cors(corsOptions));
+app.use(cors({origin: true}));
 app.use(helmet({ hsts: false }));
 app.use(logger('dev'));
 // app.use(cookieParser());
@@ -49,7 +51,7 @@ app.use(function (err, _req, res, _next) {
 });
 
 io.on('connection', socket => {
-  console.log('a user connected');
+  console.log(`${socket.id} connected`);
   socket.on('join rooms', channels => {
     channels.forEach(channel => {
       socket.join(channel, () => {
@@ -57,11 +59,30 @@ io.on('connection', socket => {
       });
       socket.on(channel, async({ user, message}) => {
         console.log(`${channel} -- ${message} -- ${user.displayName}`);
-        // const newMessage = await addMessageToChannel(nickName, channel.id, message);
-        socket.to(channel).emit(channel, { user, message });
-        socket.emit(channel, { user, message });
+        const newMessage = await Message.create({
+          userId: user.id,
+          channelId: channel,
+          content: message,
+          pinned: false
+        });
+        const response = {
+          id: newMessage.id,
+          channelId: newMessage.channelId,
+          content: newMessage.content,
+          pinned: newMessage.pinned,
+          createdAt: newMessage.createdAt,
+          userId: newMessage.userId,
+          displayName: user.displayName,
+          profileImage: user.profileImage
+        }
+        socket.to(channel).emit(channel, response);
+        socket.emit(channel, response);
       })
     });
+  });
+
+  socket.on('disconnect', () => {
+    console.log(`${socket.id} disconnected`);
   });
 });
 

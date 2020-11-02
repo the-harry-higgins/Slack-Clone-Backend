@@ -47,7 +47,8 @@ router.put('/', [email, password], asyncHandler(async (req, res, next) => {
         id: channel.id,
         name: channel.name,
         topic: channel.topic,
-        type: channel.ChannelType.type
+        type: channel.ChannelType.type,
+        notification: false
       }
     })
   }
@@ -65,7 +66,8 @@ router.get('/currentuser', authenticated, asyncHandler(async (req, res, next) =>
         id: channel.id,
         name: channel.name,
         topic: channel.topic,
-        type: channel.ChannelType.type
+        type: channel.ChannelType.type,
+        notification: false
       }
     })
   }
