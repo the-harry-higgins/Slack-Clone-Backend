@@ -3,7 +3,7 @@ const router = express.Router();
 
 const { asyncHandler } = require('../utils');
 const { authenticated } = require('./auth-utils');
-const { Message, User } = require('../../db/models');
+const { Message, User, Channel } = require('../../db/models');
 
 router.get('/:id/messages', authenticated, asyncHandler(async(req, res, next) => {
   const messages = await Message.findAll({
@@ -30,5 +30,31 @@ router.get('/:id/messages', authenticated, asyncHandler(async(req, res, next) =>
   }
   res.json(response);
 }));
+
+
+router.get('/', authenticated, asyncHandler(async(req, res, next) => {
+  console.log('Entered function');
+  const channels = await Channel.findAll({
+    // where: {
+    //   channelTypeId: 1
+    // },
+    order: ['name']
+  });
+
+  const response = {
+    channels: channels.map(channel => {
+      return {
+        id: channel.id,
+        name: channel.name,
+        topic: channel.topic,
+        channelTypeId: channel.channelTypeId
+      }
+    })
+  }
+
+  res.json(response);
+}));
+
+
 
 module.exports = router;
