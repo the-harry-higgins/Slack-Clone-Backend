@@ -7,24 +7,24 @@ const { Message, User, Channel, ChannelUser } = require('../../db/models');
 const channeluser = require('../../db/models/channeluser');
 
 // Get all messages for a channel
-router.get('/:id/messages', authenticated, asyncHandler(async(req, res, next) => {
+router.get('/:id/messages', authenticated, asyncHandler(async (req, res, next) => {
   const messages = await Message.findAll({
     where: {
       channelId: req.params.id
     },
-    include: [ User ],
+    include: [User],
     order: [['createdAt', 'DESC']],
     limit: 50
   });
   const response = {
     messages: messages.map(message => {
-      return { 
+      return {
         id: message.id,
         channelId: message.channelId,
         content: message.content,
         pinned: message.pinned,
         createdAt: message.createdAt,
-        userId: message.userId, 
+        userId: message.userId,
         displayName: message.User.displayName,
         profileImage: message.User.profileImage
       }
@@ -34,10 +34,10 @@ router.get('/:id/messages', authenticated, asyncHandler(async(req, res, next) =>
 }));
 
 // Get all channels
-router.get('/', authenticated, asyncHandler(async(req, res, next) => {
+router.get('/', authenticated, asyncHandler(async (req, res, next) => {
   const channels = await Channel.findAll({
     where: {
-      channelTypeId: [1,2],
+      channelTypeId: [1, 2],
     },
     include: [User],
     order: ['name']
@@ -61,6 +61,7 @@ router.get('/', authenticated, asyncHandler(async(req, res, next) => {
 
 // Join a channel
 router.post('/:id/', authenticated, asyncHandler(async (req, res, next) => {
+  
   const { userId } = req.body;
 
   const channelUser = ChannelUser.build({
@@ -69,10 +70,22 @@ router.post('/:id/', authenticated, asyncHandler(async (req, res, next) => {
   });
 
   await channelUser.save();
-  console.log(channelUser.toJSON());
 
   res.json(channelUser.toJSON());
 }));
 
+
+// Leave a channel
+router.delete('/:channelId/users/:userId/', authenticated, asyncHandler(async (req, res, next) => {
+
+  await ChannelUser.destroy({
+    where: {
+      channelId: req.params.channelId,
+      userId: req.params.userId
+    }
+  });
+
+  res.sendStatus(200);
+}));
 
 module.exports = router;
