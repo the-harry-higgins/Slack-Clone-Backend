@@ -35,11 +35,14 @@ router.get('/:id/messages', authenticated, asyncHandler(async(req, res, next) =>
 router.get('/', authenticated, asyncHandler(async(req, res, next) => {
   console.log('Entered function');
   const channels = await Channel.findAll({
-    // where: {
-    //   channelTypeId: 1
-    // },
+    where: {
+      channelTypeId: [1,2],
+    },
+    include: [User],
     order: ['name']
   });
+
+  console.log(channels[0]);
 
   const response = {
     channels: channels.map(channel => {
@@ -47,7 +50,8 @@ router.get('/', authenticated, asyncHandler(async(req, res, next) => {
         id: channel.id,
         name: channel.name,
         topic: channel.topic,
-        channelTypeId: channel.channelTypeId
+        channelTypeId: channel.channelTypeId,
+        members: channel.Users.length,
       }
     })
   }

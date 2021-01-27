@@ -58,19 +58,39 @@ router.put('/', [email, password], asyncHandler(async (req, res, next) => {
 
 // LOGIN when token exists in localstorage
 router.get('/currentuser', authenticated, asyncHandler(async (req, res, next) => {
+  const channels = [];
+  const directMessages = [];
+  req.user.Channels.forEach(channel => {
+    if (channel.ChannelType.type === 'directmessage') {
+      directMessages.push(channel);
+    } else {
+      channels.push(channel);
+    }
+  });
+  
   const response = {
     user: req.user.toSafeObject(),
     theme: req.user.Theme.toJSON(),
-    channels: req.user.Channels.map(channel => {
+    channels: channels.map(channel => {
       return {
         id: channel.id,
         name: channel.name,
         topic: channel.topic,
         type: channel.ChannelType.type,
-        notification: false
+        notification: false,
       }
-    })
+    }),
+    directMessages: directMessages.map(channel => {
+      return {
+        id: channel.id,
+        name: channel.name,
+        topic: channel.topic,
+        type: channel.ChannelType.type,
+        notification: false,
+      }
+    }),
   }
+
   res.json(response);
 }));
 
