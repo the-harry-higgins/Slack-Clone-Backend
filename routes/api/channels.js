@@ -3,8 +3,10 @@ const router = express.Router();
 
 const { asyncHandler } = require('../utils');
 const { authenticated } = require('./auth-utils');
-const { Message, User, Channel } = require('../../db/models');
+const { Message, User, Channel, ChannelUser } = require('../../db/models');
+const channeluser = require('../../db/models/channeluser');
 
+// Get all messages for a channel
 router.get('/:id/messages', authenticated, asyncHandler(async(req, res, next) => {
   const messages = await Message.findAll({
     where: {
@@ -31,9 +33,8 @@ router.get('/:id/messages', authenticated, asyncHandler(async(req, res, next) =>
   res.json(response);
 }));
 
-
+// Get all channels
 router.get('/', authenticated, asyncHandler(async(req, res, next) => {
-  console.log('Entered function');
   const channels = await Channel.findAll({
     where: {
       channelTypeId: [1,2],
@@ -41,8 +42,6 @@ router.get('/', authenticated, asyncHandler(async(req, res, next) => {
     include: [User],
     order: ['name']
   });
-
-  console.log(channels[0]);
 
   const response = {
     channels: channels.map(channel => {
@@ -59,6 +58,21 @@ router.get('/', authenticated, asyncHandler(async(req, res, next) => {
   res.json(response);
 }));
 
+
+// Join a channel
+router.post('/:id/', authenticated, asyncHandler(async (req, res, next) => {
+  const { userId } = req.body;
+
+  const channelUser = ChannelUser.build({
+    userId: userId,
+    channelId: req.params.id
+  });
+
+  await channelUser.save();
+  console.log(channelUser.toJSON());
+
+  res.json(channelUser.toJSON());
+}));
 
 
 module.exports = router;

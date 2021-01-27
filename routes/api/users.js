@@ -42,7 +42,8 @@ router.post('/', [displayName, email, password], asyncHandler(async(req, res, ne
   const user = User.build({
     email,
     displayName,
-    lightMode: true
+    lightMode: true,
+    themeId: 1,
   });
 
   user.setPassword(password);
@@ -51,7 +52,12 @@ router.post('/', [displayName, email, password], asyncHandler(async(req, res, ne
 
   const token = generateToken(user);
 
-  res.json({ token, user: user.toSafeObject() });
+  res.json({ 
+    token, 
+    user: user.toSafeObject(), 
+    theme: user.Theme.toJson(), 
+    channels: []
+  });
 }))
 
 // router.get('/:id', asyncHandler(async (req, res, next) => {
