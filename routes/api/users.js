@@ -4,12 +4,12 @@ const { check, validationResult } = require('express-validator');
 
 const { asyncHandler } = require('../utils');
 const { authenticated, generateToken } = require('./auth-utils');
-const { User } = require('../../db/models');
+const { User, Theme } = require('../../db/models');
 
-const displayName = 
+const displayName =
   check('displayName')
     .exists({ checkFalsy: true })
-    
+
 const email =
   check('email')
     .exists({ checkFalsy: true })
@@ -31,7 +31,7 @@ const password =
 // }));
 
 // CREATE a new user
-router.post('/', [displayName, email, password], asyncHandler(async(req, res, next) => {
+router.post('/', [displayName, email, password], asyncHandler(async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return next({ status: 422, errors: errors.array() });
@@ -50,14 +50,17 @@ router.post('/', [displayName, email, password], asyncHandler(async(req, res, ne
 
   await user.save();
 
-  const token = generateToken(user);
+  const theme = await Theme.findByPk(1);
 
-  res.json({ 
-    token, 
-    user: user.toSafeObject(), 
-    theme: user.Theme.toJson(), 
+  const token = generateToken(user);
+  
+  res.json({
+    token,
+    user: user.toSafeObject(),
+    theme,
     channels: []
   });
+
 }))
 
 // router.get('/:id', asyncHandler(async (req, res, next) => {

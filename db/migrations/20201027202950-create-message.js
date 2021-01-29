@@ -22,7 +22,9 @@ module.exports = {
         references: {
           model: 'Channels',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       },
       content: {
         allowNull: false,

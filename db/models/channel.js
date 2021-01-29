@@ -12,15 +12,18 @@ module.exports = (sequelize, DataTypes) => {
     channelTypeId: {
       type: DataTypes.STRING,
       allowNull: false,
-      references: { model: 'Channels' }
+      references: { model: 'ChannelTypes' }
     },
   }, {});
-  Channel.associate = function(models) {
+  Channel.associate = function (models) {
     Channel.belongsTo(models.ChannelType, { foreignKey: 'channelTypeId' });
-    Channel.hasMany(models.Message, { foreignKey: 'channelId' });
+    Channel.hasMany(models.Message, {
+      foreignKey: 'channelId',
+      onDelete: 'CASCADE'
+    });
     Channel.hasMany(models.ThreadMessage, { foreignKey: 'channelId' });
     Channel.hasMany(models.ChannelUser, { foreignKey: 'channelId' });
-    Channel.belongsToMany(models.User, { 
+    Channel.belongsToMany(models.User, {
       through: 'ChannelUser',
       otherKey: 'userId',
       foreignKey: 'channelId'

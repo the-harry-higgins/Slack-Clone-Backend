@@ -88,4 +88,21 @@ router.delete('/:channelId/users/:userId/', authenticated, asyncHandler(async (r
   res.sendStatus(200);
 }));
 
+
+// Delete a channel
+router.delete('/:id/', authenticated, asyncHandler(async (req, res) => {
+
+  try {
+    await Channel.destroy({
+      where: {
+        id: req.params.id
+      }
+    });
+  } catch (e) {
+    console.log(e);
+  }
+
+  res.sendStatus(200);
+}))
+
 module.exports = router;

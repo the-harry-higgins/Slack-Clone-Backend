@@ -22,7 +22,11 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   Message.associate = function(models) {
     Message.belongsTo(models.User, { foreignKey: 'userId' });
-    Message.belongsTo(models.Channel, { foreignKey: 'channelId' });
+    Message.belongsTo(models.Channel, { 
+      foreignKey: 'channelId',
+      onDelete: 'CASCADE',
+      hooks: true,
+    });
     Message.hasMany(models.ThreadMessage, { foreignKey: 'messageId' });
   };
   return Message;

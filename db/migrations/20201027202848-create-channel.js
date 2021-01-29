@@ -20,7 +20,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.INTEGER,
         references: {
-          model: 'Channels',
+          model: 'ChannelTypes',
           key: 'id'
         }
       },

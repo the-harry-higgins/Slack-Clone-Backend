@@ -11,12 +11,16 @@ module.exports = {
       userId: {
         allowNull: false,
         type: Sequelize.INTEGER,
-        references: { model: 'Users' }
+        references: { model: 'Users' },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       },
       channelId: {
         allowNull: false,
         type: Sequelize.INTEGER,
-        references: { model: 'Channels' }
+        references: { model: 'Channels' },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       },
       createdAt: {
         allowNull: false,
