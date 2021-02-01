@@ -103,6 +103,34 @@ router.delete('/:id/', authenticated, asyncHandler(async (req, res) => {
   }
 
   res.sendStatus(200);
+}));
+
+
+// Create a channel
+router.post('/', authenticated, asyncHandler(async (req, res) => {
+
+  const { userId, name } = req.body;
+
+  const channel = await Channel.build({
+    name,
+    topic: null,
+    channelTypeId: 1,
+  });
+
+  await channel.save();
+
+  const channelUser = ChannelUser.build({
+    userId: userId,
+    channelId: channel.id
+  });
+
+  await channelUser.save();
+
+  res.json({
+    channel: channel.toJSON(),
+    channelUser: channelUser.toJSON()
+  });
+
 }))
 
 module.exports = router;
