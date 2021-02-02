@@ -6,6 +6,8 @@ const { asyncHandler } = require('../utils');
 const { authenticated, generateToken } = require('./auth-utils');
 const { User, Theme } = require('../../db/models');
 
+const { Op } = require("sequelize");
+
 const displayName =
   check('displayName')
     .exists({ checkFalsy: true })
@@ -22,13 +24,26 @@ const password =
     .exists({ checkFalsy: true })
     .withMessage('Please provide a password');
 
-// GET all users
-// router.get('/', asyncHandler(async(req, res, next) => {
-//   const users = await User.findAll({
-//     attributes: ['id', 'email', 'fullName', 'displayName', 'phoneNumber', 'profileImage', 'themeId', 'lightMode', 'createdAt', 'updatedAt']
-//   });
-//   res.json(users);
-// }));
+
+// GET users that match the search term
+router.get('/matching/:term/', authenticated, asyncHandler(async(req, res, next) => {
+  try {
+    const users = await User.findAll({
+      where: {
+        displayName: {
+          [Op.iLike] : `${req.params.term}%`
+        }
+      },
+      attributes: ['id', 'email', 'displayName', 'phoneNumber', 'profileImage', 'themeId', 'lightMode', 'createdAt', 'updatedAt'],
+      order: [['displayName', 'DESC']],
+      limit: 5,
+    });
+    res.json(users);
+  } catch (e) {
+    console.log(e);
+  }
+}));
+
 
 // CREATE a new user
 router.post('/', [displayName, email, password], asyncHandler(async (req, res, next) => {
