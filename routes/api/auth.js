@@ -18,6 +18,43 @@ const password =
     .exists({ checkFalsy: true })
     .withMessage('Please provide a password');
 
+
+const buildResponse = async (user) => {
+  const channels = [];
+  const directMessages = [];
+  user.Channels.forEach(channel => {
+    if (channel.ChannelType.type === 'directmessage') {
+      directMessages.push(channel);
+    } else {
+      channels.push(channel);
+    }
+  });
+
+  const directMessagesResponse = await Promise.all(
+    directMessages.map((dmChannel) => {
+      // console.log(dmChannel)
+      return dmChannel.toDirectMessage(user.id);
+    })
+  );
+
+  const response = {
+    user: user.toSafeObject(),
+    theme: user.Theme.toJSON(),
+    channels: user.Channels.map(channel => {
+      return {
+        id: channel.id,
+        name: channel.name,
+        topic: channel.topic,
+        type: channel.ChannelType.type,
+        notification: false,
+      }
+    }),
+    directMessages: directMessagesResponse,
+  }
+
+  return response;
+}
+
 // LOGIN from form
 router.put('/', [email, password], asyncHandler(async (req, res, next) => {
   const errors = validationResult(req);
@@ -38,58 +75,16 @@ router.put('/', [email, password], asyncHandler(async (req, res, next) => {
   }
 
   const token = generateToken(user);
-  const response = {
-    token,
-    user: user.toSafeObject(),
-    theme: user.Theme.toJSON(),
-    channels: user.Channels.map(channel => {
-      return {
-        id: channel.id,
-        name: channel.name,
-        topic: channel.topic,
-        type: channel.ChannelType.type,
-        notification: false
-      }
-    })
-  }
-  
+  const response = await buildResponse(user);
+  response['token'] = token;
+
   res.json(response);
 }));
 
 // LOGIN when token exists in localstorage
 router.get('/currentuser', authenticated, asyncHandler(async (req, res, next) => {
-  const channels = [];
-  const directMessages = [];
-  req.user.Channels.forEach(channel => {
-    if (channel.ChannelType.type === 'directmessage') {
-      directMessages.push(channel);
-    } else {
-      channels.push(channel);
-    }
-  });
-  
-  const response = {
-    user: req.user.toSafeObject(),
-    theme: req.user.Theme.toJSON(),
-    channels: channels.map(channel => {
-      return {
-        id: channel.id,
-        name: channel.name,
-        topic: channel.topic,
-        type: channel.ChannelType.type,
-        notification: false,
-      }
-    }),
-    directMessages: directMessages.map(channel => {
-      return {
-        id: channel.id,
-        name: channel.name,
-        topic: channel.topic,
-        type: channel.ChannelType.type,
-        notification: false,
-      }
-    }),
-  }
+
+  const response = await buildResponse(req.user);
 
   res.json(response);
 }));

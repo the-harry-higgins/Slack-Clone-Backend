@@ -1,4 +1,6 @@
 'use strict';
+const { Op } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   const Channel = sequelize.define('Channel', {
     name: {
@@ -29,5 +31,31 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'channelId'
     });
   };
+
+  Channel.prototype.toDirectMessage = async function (userId) {
+    try {
+      const otherChannelUser = await sequelize.models.ChannelUser.findOne({
+        where: {
+          channelId: this.id,
+          userId: {
+            [Op.ne]: userId
+          }
+        },
+        include: sequelize.models.User
+      });
+
+      return {
+        id: this.id,
+        channelTypeId: this.channelTypeId,
+        otherUser: otherChannelUser.User.toSafeObject(),
+        createdAt: this.createdAt,
+        updatedAt: this.updatedAt,
+      };
+
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   return Channel;
 };

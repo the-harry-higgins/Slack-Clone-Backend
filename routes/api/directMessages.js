@@ -8,15 +8,24 @@ const { Message, User, Channel, ChannelUser } = require('../../db/models');
 // Get direct messages and last message for each
 router.get('/all/users/:userId/', authenticated, asyncHandler(async (req, res, next) => {
   const channels = await Channel.findAll({
-    where: {
-      channelTypeId: [3],
-    },
-    include: [User, {
-      model: ChannelUser,
-      where: {
-        userId: req.params.userId
+    // where: {
+    //   channelTypeId: [3],
+    // },
+    include: [
+      // User,
+      {
+        model: ChannelUser,
+        where: {
+          userId: req.params.userId
+        }
+      },
+      {
+        model: ChannelType,
+        where: {
+          type: 'directMessage'
+        }
       }
-    }],
+    ],
     order: [['updatedAt', 'DESC']]
   });
 
@@ -53,77 +62,49 @@ router.get('/all/users/:userId/', authenticated, asyncHandler(async (req, res, n
 }));
 
 
-// Join a channel
-router.post('/:id/', authenticated, asyncHandler(async (req, res, next) => {
-
-  const { userId } = req.body;
-
-  const channelUser = ChannelUser.build({
-    userId: userId,
-    channelId: req.params.id
-  });
-
-  await channelUser.save();
-
-  res.json(channelUser.toJSON());
-}));
-
-
-// Leave a channel
-router.delete('/:channelId/users/:userId/', authenticated, asyncHandler(async (req, res, next) => {
-
-  await ChannelUser.destroy({
-    where: {
-      channelId: req.params.channelId,
-      userId: req.params.userId
-    }
-  });
-
-  res.sendStatus(200);
-}));
-
-
-// Delete a channel
-router.delete('/:id/', authenticated, asyncHandler(async (req, res) => {
-
+// Create a direct message channel
+router.post('/', authenticated, asyncHandler(async (req, res) => {
   try {
-    await Channel.destroy({
-      where: {
-        id: req.params.id
-      }
+    // console.log('User', req.user);
+  
+    const { otherUser } = req.body;
+  
+    const dmChannel = await Channel.build({
+      topic: null,
+      channelTypeId: 3,
     });
+  
+    await dmChannel.save();
+  
+    // console.log('\n\nDM Channel', dmChannel);
+  
+    const channelUser = ChannelUser.build({
+      userId: req.user.id,
+      channelId: dmChannel.id
+    });
+  
+    await channelUser.save();
+    // console.log('\n\nChannel User', channelUser);
+  
+    const otherChannelUser = ChannelUser.build({
+      userId: otherUser.id,
+      channelId: dmChannel.id
+    });
+  
+    await otherChannelUser.save();
+    // console.log('\n\nOther Channel User', otherChannelUser);
+  
+    res.json({
+      id: dmChannel.id,
+      type: 'directMessage',
+      otherUser,
+      notification: false,
+    });
+    
   } catch (e) {
     console.log(e);
   }
 
-  res.sendStatus(200);
-}));
-
-
-// Create a channel
-router.post('/', authenticated, asyncHandler(async (req, res) => {
-
-  const { userId, name } = req.body;
-
-  const channel = await Channel.build({
-    name,
-    topic: null,
-    channelTypeId: 1,
-  });
-
-  await channel.save();
-
-  const channelUser = ChannelUser.build({
-    userId: userId,
-    channelId: channel.id
-  });
-
-  await channelUser.save();
-
-  res.json({
-    channel: channel.toJSON(),
-    channelUser: channelUser.toJSON()
-  });
 
 }))
 
