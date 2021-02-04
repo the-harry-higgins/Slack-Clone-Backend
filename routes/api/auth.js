@@ -32,7 +32,6 @@ const buildResponse = async (user) => {
 
   const directMessagesResponse = await Promise.all(
     directMessages.map((dmChannel) => {
-      // console.log(dmChannel)
       return dmChannel.toDirectMessage(user.id);
     })
   );
@@ -40,7 +39,7 @@ const buildResponse = async (user) => {
   const response = {
     user: user.toSafeObject(),
     theme: user.Theme.toJSON(),
-    channels: user.Channels.map(channel => {
+    channels: channels.map(channel => {
       return {
         id: channel.id,
         name: channel.name,
