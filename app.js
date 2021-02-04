@@ -48,14 +48,14 @@ app.use(function (err, _req, res, _next) {
 });
 
 io.on('connection', socket => {
-  // console.log(`${socket.id} connected`);
+  console.log(`${socket.id} connected`);
   socket.on('join rooms', channels => {
     channels.forEach(channel => {
       socket.join(channel, () => {
-        // console.log(`${socket.id} has joined ${channel}`);
+        console.log(`${socket.id} has joined ${channel}`);
       });
       socket.on(channel, async({ user, message}) => {
-        // console.log(`${channel} -- ${message} -- ${user.displayName}`);
+        console.log(`${channel} -- ${message} -- ${user.displayName}`);
         const newMessage = await Message.create({
           userId: user.id,
           channelId: channel,
@@ -79,7 +79,7 @@ io.on('connection', socket => {
   });
 
   socket.on('disconnect', () => {
-    // console.log(`${socket.id} disconnected`);
+    console.log(`${socket.id} disconnected`);
   });
 });
 

@@ -39,15 +39,7 @@ const buildResponse = async (user) => {
   const response = {
     user: user.toSafeObject(),
     theme: user.Theme.toJSON(),
-    channels: channels.map(channel => {
-      return {
-        id: channel.id,
-        name: channel.name,
-        topic: channel.topic,
-        type: channel.ChannelType.type,
-        notification: false,
-      }
-    }),
+    channels: channels.map(channel => channel.toJSON()),
     directMessages: directMessagesResponse,
   }
 

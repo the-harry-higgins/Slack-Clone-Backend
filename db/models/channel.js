@@ -32,33 +32,21 @@ module.exports = (sequelize, DataTypes) => {
     });
   };
 
-  Channel.prototype.toDirectMessage = async function (userId) {
-    try {
-      const otherChannelUser = await sequelize.models.ChannelUser.findOne({
-        where: {
-          channelId: this.id,
-          userId: {
-            [Op.ne]: userId
-          }
-        },
-        include: sequelize.models.User
-      });
-
-      return {
-        id: this.id,
-        channelTypeId: this.channelTypeId,
-        createdAt: this.createdAt,
-        updatedAt: this.updatedAt,
-        otherUser: otherChannelUser.User.toSafeObject(),
-      };
-
-    } catch (e) {
-      console.log(e);
-    }
+  Channel.prototype.toJSON = function () {
+    return {
+      id: this.id,
+      name: this.name,
+      topic: this.topic,
+      type: this.ChannelType.type,
+      notification: false,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
   }
 
-  Channel.prototype.toDirectMessagePreview = async function (userId) {
-    try {
+  Channel.prototype.toDirectMessage = async function (userId, otherUser) {
+
+    if (!otherUser) {
       const otherChannelUser = await sequelize.models.ChannelUser.findOne({
         where: {
           channelId: this.id,
@@ -69,27 +57,54 @@ module.exports = (sequelize, DataTypes) => {
         include: sequelize.models.User
       });
 
-      const lastMessage = await sequelize.models.Message.findOne( {
+      otherUser = otherChannelUser.User.toSafeObject();
+    }
+
+    return {
+      id: this.id,
+      type: this.ChannelType.type,
+      notification: false,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      otherUser,
+    };
+  }
+
+  Channel.prototype.toDirectMessagePreview = async function (userId, otherUser) {
+
+    if (!otherUser) {
+      const otherChannelUser = await sequelize.models.ChannelUser.findOne({
         where: {
-          channelId: this.id
+          channelId: this.id,
+          userId: {
+            [Op.ne]: userId
+          }
         },
-        include: [sequelize.models.User],
-        order: [['createdAt', 'DESC']],
-        limit: 1
+        include: sequelize.models.User
       });
 
-      return {
-        id: this.id,
-        channelTypeId: this.channelTypeId,
-        createdAt: this.createdAt,
-        updatedAt: this.updatedAt,
-        otherUser: otherChannelUser.User.toSafeObject(),
-        lastMessage,
-      };
-
-    } catch (e) {
-      console.log(e);
+      otherUser = otherChannelUser.User.toSafeObject();
     }
+
+    const lastMessage = await sequelize.models.Message.findOne({
+      where: {
+        channelId: this.id
+      },
+      include: [sequelize.models.User],
+      order: [['createdAt', 'DESC']],
+      limit: 1
+    });
+
+    return {
+      id: this.id,
+      type: this.ChannelType.type,
+      notification: false,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      otherUser,
+      lastMessage,
+    };
+
   }
 
   return Channel;

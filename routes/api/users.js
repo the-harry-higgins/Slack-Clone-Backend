@@ -26,22 +26,21 @@ const password =
 
 
 // GET users that match the search term
-router.get('/matching/:term/', authenticated, asyncHandler(async(req, res, next) => {
-  try {
-    const users = await User.findAll({
-      where: {
-        displayName: {
-          [Op.iLike] : `${req.params.term}%`
-        }
-      },
-      attributes: ['id', 'email', 'displayName', 'phoneNumber', 'profileImage', 'themeId', 'lightMode', 'createdAt', 'updatedAt'],
-      order: [['displayName', 'DESC']],
-      limit: 5,
-    });
-    res.json(users);
-  } catch (e) {
-    console.log(e);
-  }
+router.get('/matching/:term/', authenticated, asyncHandler(async (req, res, next) => {
+
+  const users = await User.findAll({
+    where: {
+      displayName: {
+        [Op.iLike]: `${req.params.term}%`
+      }
+    },
+    attributes: ['id', 'email', 'displayName', 'phoneNumber', 'profileImage', 'themeId', 'lightMode', 'createdAt', 'updatedAt'],
+    order: [['displayName', 'DESC']],
+    limit: 5,
+  });
+
+  res.json(users);
+
 }));
 
 
@@ -68,21 +67,15 @@ router.post('/', [displayName, email, password], asyncHandler(async (req, res, n
   const theme = await Theme.findByPk(1);
 
   const token = generateToken(user);
-  
+
   res.json({
     token,
     user: user.toSafeObject(),
     theme,
-    channels: []
+    channels: [],
+    directMessages: [],
   });
 
 }))
-
-// router.get('/:id', asyncHandler(async (req, res, next) => {
-//   const user = await User.findByPk(req.params.id, {
-//     attributes: ['id', 'email', 'fullName', 'displayName', 'phoneNumber', 'profileImage', 'themeId', 'lightMode', 'createdAt', 'updatedAt']
-//   });
-//   res.json(user);
-// }));
 
 module.exports = router;

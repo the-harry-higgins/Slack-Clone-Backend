@@ -3,33 +3,34 @@ const router = express.Router();
 
 const { asyncHandler } = require('../utils');
 const { authenticated } = require('./auth-utils');
-const { Channel, ChannelUser } = require('../../db/models');
+const { Channel, ChannelUser, ChannelType } = require('../../db/models');
 
-// Get direct messages and last message for each
-router.get('/all/users/:userId/', authenticated, asyncHandler(async (req, res, next) => {
+
+// Get all direct messages and last message for each
+router.get('/', authenticated, asyncHandler(async (req, res, next) => {
   try {
-
     const dmChannels = await Channel.findAll({
       where: {
         channelTypeId: 3
       },
       include: [
+        ChannelType,
         {
           model: ChannelUser,
           where: {
-            userId: req.params.userId
+            userId: req.user.id
           }
         },
       ],
       order: [['updatedAt', 'DESC']]
     });
-
+  
     const directMessagesResponse = await Promise.all(
       dmChannels.map((dmChannel) => {
         return dmChannel.toDirectMessagePreview(req.user.id);
       })
     );
-
+  
     res.json(directMessagesResponse);
 
   } catch (e) {
@@ -41,40 +42,39 @@ router.get('/all/users/:userId/', authenticated, asyncHandler(async (req, res, n
 
 // Create a direct message channel
 router.post('/', authenticated, asyncHandler(async (req, res) => {
-  try {
-    const { otherUser } = req.body;
+try {
+  const { otherUser } = req.body;
 
-    const dmChannel = await Channel.build({
-      topic: null,
-      channelTypeId: 3,
-    });
+  const dmChannel = await Channel.build({
+    topic: null,
+    channelTypeId: 3,
+  });
 
-    await dmChannel.save();
+  await dmChannel.save();
 
-    const channelUser = ChannelUser.build({
-      userId: req.user.id,
-      channelId: dmChannel.id
-    });
+  dmChannel.ChannelType = await dmChannel.getChannelType();
 
-    await channelUser.save();
+  const channelUser = ChannelUser.build({
+    userId: req.user.id,
+    channelId: dmChannel.id
+  });
 
-    const otherChannelUser = ChannelUser.build({
-      userId: otherUser.id,
-      channelId: dmChannel.id
-    });
+  await channelUser.save();
 
-    await otherChannelUser.save();
+  const otherChannelUser = ChannelUser.build({
+    userId: otherUser.id,
+    channelId: dmChannel.id
+  });
 
-    res.json({
-      id: dmChannel.id,
-      channelTypeId: 3,
-      otherUser,
-      notification: false,
-    });
+  await otherChannelUser.save();
 
-  } catch (e) {
-    console.log(e);
-  }
+  const response = await dmChannel.toDirectMessage(req.user.id, otherUser);
+
+  res.json(response);
+
+} catch (e) {
+   console.log(e);
+}
 
 }))
 
