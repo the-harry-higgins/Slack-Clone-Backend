@@ -35,7 +35,7 @@ router.get('/:id/messages', authenticated, asyncHandler(async (req, res, next) =
       channelId: req.params.id
     },
     include: [User],
-    order: ['createdAt'],
+    order: [['createdAt', 'DESC']],
     limit: 50
   });
   const response = {
@@ -50,7 +50,7 @@ router.get('/:id/messages', authenticated, asyncHandler(async (req, res, next) =
         displayName: message.User.displayName,
         profileImage: message.User.profileImage
       }
-    })
+    }).reverse()
   }
   res.json(response);
 }));
