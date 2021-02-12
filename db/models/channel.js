@@ -95,6 +95,10 @@ module.exports = (sequelize, DataTypes) => {
       limit: 1
     });
 
+    if (lastMessage) {
+      lastMessage.User = lastMessage.User.toSafeObject();
+    }
+
     return {
       id: this.id,
       type: this.ChannelType.type,
