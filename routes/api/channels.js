@@ -15,15 +15,15 @@ router.get('/', authenticated, asyncHandler(async (req, res, next) => {
     include: [User, ChannelType],
     order: ['name']
   });
-  
+
   const response = {
-    channels: channels.map(channel =>  {
+    channels: channels.map(channel => {
       const json = channel.toJSON();
       json['members'] = channel.Users.length;
       return json;
     })
   }
-  
+
   res.json(response);
 }));
 
@@ -58,41 +58,45 @@ router.get('/:id/messages', authenticated, asyncHandler(async (req, res, next) =
 
 // Create a channel
 router.post('/', authenticated, asyncHandler(async (req, res) => {
-  
+
   const { name } = req.body;
-  
+
   const channel = await Channel.build({
     name,
     topic: null,
     channelTypeId: 1,
   });
-  
+
   await channel.save();
-  
+
+  const type = await ChannelType.findByPk(1);
+
+  channel.ChannelType = type;
+
   const channelUser = ChannelUser.build({
     userId: req.user.id,
     channelId: channel.id
   });
-  
+
   await channelUser.save();
-  
+
   res.json({
     channel: channel.toJSON(),
     channelUser
   });
-  
+
 }));
 
 
 // Delete a channel
 router.delete('/:id/', authenticated, asyncHandler(async (req, res) => {
-  
+
   await Channel.destroy({
     where: {
       id: req.params.id
     }
   });
-  
+
   res.sendStatus(200);
 }));
 
