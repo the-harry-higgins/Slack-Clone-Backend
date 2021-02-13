@@ -12,18 +12,18 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 
-// const whitelist = ['http://localhost:3000']
-// const corsOptions = {
-//   origin: (origin, callback) => {
-//     if (whitelist.includes(origin) || !origin) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error('Not allowed by CORS'));
-//     }
-//   }
-// }
+const whitelist = ['http://localhost:3000', 'https://master.d3izqolo2r3a78.amplifyapp.com']
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (whitelist.includes(origin) || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+}
 
-app.use(cors({ origin: true }));
+app.use(cors(corsOptions));
 app.use(helmet({ hsts: false }));
 app.use(logger('dev'));
 app.use(express.json());
