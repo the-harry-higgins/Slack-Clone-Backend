@@ -47,33 +47,30 @@ app.use(function (err, _req, res, _next) {
   });
 });
 
-io.on('connection', socket => {
-  console.log(`${socket.id} connected`);
 
-  // Join a personal channel for notifications
+io.on('connection', socket => {
+
   socket.on('notify user', ({ channel, to }) => {
     socket.to(`user ${to}`).emit('new dm channel', channel);
   });
 
   socket.on('join personal room', userId => {
-    socket.join(`user ${userId}`, () => {
-      console.log(`${socket.id} has joined personal room`);
-    });
+    socket.join(`user ${userId}`);
   });
 
   socket.on('join rooms', channels => {
+
     channels.forEach(channel => {
-      socket.join(channel, () => {
-        console.log(`${socket.id} has joined ${channel}`);
-      });
+      socket.join(channel);
+
       socket.on(channel, async ({ user, message }) => {
-        console.log(`${channel} -- ${message} -- ${user.displayName}`);
         const newMessage = await Message.create({
           userId: user.id,
           channelId: channel,
           content: message,
           pinned: false
         });
+
         const response = {
           id: newMessage.id,
           channelId: newMessage.channelId,
@@ -84,15 +81,17 @@ io.on('connection', socket => {
           displayName: user.displayName,
           profileImage: user.profileImage
         }
+
         socket.to(channel).emit(channel, response);
         socket.emit(channel, response);
       })
     });
   });
 
-  socket.on('disconnect', () => {
-    console.log(`${socket.id} disconnected`);
-  });
+  socket.on('leave room', (channel) => {
+    console.log(`${socket.id} left room ${channel}`);
+    socket.leave(channel);
+  })
 });
 
 module.exports = http;
