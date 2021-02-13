@@ -49,49 +49,46 @@ app.use(function (err, _req, res, _next) {
 
 
 io.on('connection', socket => {
-
-  socket.on('notify user', ({ channel, to }) => {
-    socket.to(`user ${to}`).emit('new dm channel', channel);
-  });
-
+  
   socket.on('join personal room', userId => {
     socket.join(`user ${userId}`);
   });
-
+  
   socket.on('join rooms', channels => {
-
     channels.forEach(channel => {
       socket.join(channel);
-
-      socket.on(channel, async ({ user, message }) => {
-        const newMessage = await Message.create({
-          userId: user.id,
-          channelId: channel,
-          content: message,
-          pinned: false
-        });
-
-        const response = {
-          id: newMessage.id,
-          channelId: newMessage.channelId,
-          content: newMessage.content,
-          pinned: newMessage.pinned,
-          createdAt: newMessage.createdAt,
-          userId: newMessage.userId,
-          displayName: user.displayName,
-          profileImage: user.profileImage
-        }
-
-        socket.to(channel).emit(channel, response);
-        socket.emit(channel, response);
-      })
     });
   });
-
+  
   socket.on('leave room', (channel) => {
-    console.log(`${socket.id} left room ${channel}`);
     socket.leave(channel);
-  })
+  });
+  
+  socket.on('message', async ({ channel, user, message }) => {
+    const newMessage = await Message.create({
+      userId: user.id,
+      channelId: channel,
+      content: message,
+      pinned: false
+    });
+    
+    const response = {
+      id: newMessage.id,
+      channelId: newMessage.channelId,
+      content: newMessage.content,
+      pinned: newMessage.pinned,
+      createdAt: newMessage.createdAt,
+      userId: newMessage.userId,
+      displayName: user.displayName,
+      profileImage: user.profileImage
+    }
+    
+    io.in(channel).emit('message', { channel, message: response });
+  });
+  
+  socket.on('notify user', ({ channel, to }) => {
+    socket.to(`user ${to}`).emit('new dm channel', channel);
+  });
 });
 
 module.exports = http;
