@@ -3,7 +3,7 @@
 
 ## Getting started
 
-1. Clone this repository (only this branch)
+1. Clone this repository
 
    ```bash
    git clone https://github.com/the-harry-higgins/Slack-Clone-Backend.git

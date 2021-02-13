@@ -23,7 +23,7 @@ const io = require('socket.io')(http);
 //   }
 // }
 
-app.use(cors({origin: true}));
+app.use(cors({ origin: true }));
 app.use(helmet({ hsts: false }));
 app.use(logger('dev'));
 app.use(express.json());
@@ -49,12 +49,24 @@ app.use(function (err, _req, res, _next) {
 
 io.on('connection', socket => {
   console.log(`${socket.id} connected`);
+
+  // Join a personal channel for notifications
+  socket.on('notify user', ({ channel, to }) => {
+    socket.to(`user ${to}`).emit('new dm channel', channel);
+  });
+
+  socket.on('join personal room', userId => {
+    socket.join(`user ${userId}`, () => {
+      console.log(`${socket.id} has joined personal room`);
+    });
+  });
+
   socket.on('join rooms', channels => {
     channels.forEach(channel => {
       socket.join(channel, () => {
         console.log(`${socket.id} has joined ${channel}`);
       });
-      socket.on(channel, async({ user, message}) => {
+      socket.on(channel, async ({ user, message }) => {
         console.log(`${channel} -- ${message} -- ${user.displayName}`);
         const newMessage = await Message.create({
           userId: user.id,
