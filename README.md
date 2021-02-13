@@ -1,12 +1,13 @@
 # Slack-Clone-Backend
-[MAIN README](https://github.com/the-harry-higgins/Slack-Clone-Frontend/blob/master/README.md)
+
+[MAIN README](https://github.com/the-harry-higgins/Sloth-Frontend/blob/master/README.md)
 
 ## Getting started
 
 1. Clone this repository
 
    ```bash
-   git clone https://github.com/the-harry-higgins/Slack-Clone-Backend.git
+   git clone https://github.com/the-harry-higgins/Sloth-Backend.git
    ```
 
 2. Install dependencies
@@ -17,7 +18,6 @@
 
 3. Create a **.env** file based on the example with proper settings for your
    development environment
-
 
 4. Create, migrate, and seed your database
 
